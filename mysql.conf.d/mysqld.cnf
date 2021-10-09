@@ -1,0 +1,143 @@
+#
+# The MySQL database server configuration file.
+#
+# One can use all long options that the program supports.
+# Run program with --help to get a list of available options and with
+# --print-defaults to see which it would actually understand and use.
+#
+# For explanations see
+# http://dev.mysql.com/doc/mysql/en/server-system-variables.html
+
+# Here is entries for some specific programs
+# The following values assume you have at least 32M ram
+
+[mysqld]
+#
+# * Basic Settings
+#
+datadir	= /mnt/extra/DBdata/mysql
+user		= mysql
+pid-file	= /mnt/extra/DBdata/mysql/mysqld.pid
+socket	= /mnt/extra/DBdata/mysql/mysqld.sock
+port		= 3306
+
+max_prepared_stmt_count	= 1048576
+
+# If MySQL is running as a replication slave, this should be
+# changed. Ref https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_tmpdir
+# tmpdir		= /tmp
+#
+# Instead of skip-networking the default is now to listen only on
+# localhost which is more compatible and is not less secure.
+bind-address		= 127.0.0.1,192.168.101.3
+mysqlx-bind-address	= 127.0.0.1
+#
+# * Fine Tuning
+#
+key_buffer_size		= 16M
+#key_buffer_size		= 100G
+thread_cache_size	= 600
+# max_allowed_packet	= 64M
+# thread_stack		= 256K
+
+
+# This replaces the startup script and checks MyISAM tables if needed
+# the first time they are touched
+myisam-recover-options  = BACKUP
+
+max_connections        = 2000
+back_log=2048
+performance_schema=OFF
+explicit_defaults_for_timestamp=true
+skip_name_resolve
+# skip_ssl
+skip-log-bin
+
+# default_authentication_plugin=mysql_native_password
+# ssl=0 #关闭ssl
+
+# table_open_cache       = 4000
+
+#
+# * Logging and Replication
+#
+# Both location gets rotated by the cronjob.
+#
+# Log all queries
+# Be aware that this log type is a performance killer.
+# general_log_file        = /var/log/mysql/query.log
+# general_log             = 1
+#
+# Error log - should be very few entries.
+#
+log_error = /var/log/mysql/error.log
+#
+# Here you can see queries with especially long duration
+# slow_query_log		= 1
+# slow_query_log_file	= /var/log/mysql/mysql-slow.log
+# long_query_time = 2
+# log-queries-not-using-indexes
+#
+# The following can be used as easy to replay backup logs or for replication.
+# note: if you are setting up a replication slave, see README.Debian about
+#       other settings you may need to change.
+# server-id		= 1
+# log_bin			= /var/log/mysql/mysql-bin.log
+# binlog_expire_logs_seconds	= 2592000
+max_binlog_size   = 100M
+# binlog_do_db		= include_database_name
+# binlog_ignore_db	= include_database_name
+
+#slow query
+slow_query_log=OFF
+#定义慢查询日志的路径
+slow_query_log_file = /mnt/extra/DBdata/mysql/var/log/slow_querys.log
+#定义查过多少秒的查询算是慢查询，我这里定义的是1秒，5.6之后允许设置少于1秒，例如0.1秒
+long_query_time = 0.08
+#用来设置是否记录没有使用索引的查询到慢查询记录,默认关闭,看需求开启,会产生很多日志,可动态修改
+#log-queries-not-using-indexes
+#管理指令也会被记录到慢查询。比如OPTIMEZE TABLE, ALTER TABLE,默认关闭,看需求开启,会产生很多日志,可动态修改
+#log-slow-admin-statements
+
+#file
+innodb_file_per_table=on #设置每个表一个文件
+innodb_log_file_size=1500M #设置logfile大小
+innodb_log_files_in_group=32 #设置logfile组个数
+innodb_open_files=4000 #设置最大打开表个数
+
+#buffers
+innodb_buffer_pool_size=150G #设置buffer poll size, 服务器内存 60%
+innodb_buffer_pool_instances=16 #设置buffer pool instance个数，提高并发能力
+innodb_log_buffer_size=64M #设置log buffer size大小
+
+#tune
+sync_binlog=1 #设置每次sync_binlog事务提交刷盘
+innodb_flush_log_at_trx_commit=0 #每次事务提交时MySQL都会把log buffer的数据写入log file,并且flush(刷到磁盘)中去
+innodb_use_native_aio=1 #开启异步IO
+innodb_spin_wait_delay=180 #设置spin_wait_delay参数。防止进入系统自旋
+innodb_sync_spin_loops=25 #设置spin_loops循环次数，防止进入系统自选
+innodb_flush_method=O_DIRECT #设置innodb数据文件及redo log的打开、刷写模式
+innodb_io_capacity=20000 #设置innodb后台线程每秒最大iops上限
+innodb_io_capacity_max=40000 #设置压力下innodb后台线程每秒最大iops上限
+innodb_lru_scan_depth=9000 #设置page cleaner线程每次刷脏页的数量
+innodb_page_cleaners=16 #设置将脏数据写入到磁盘的线程数
+table_open_cache_instances=32 #设置打开句柄分区数
+table_open_cache=30000 #设置打开表的数量
+
+#perf special
+innodb_flush_neighbors=0 #检测该页所在区(extent)的所有页，如果是脏页，那么一起进行刷新，SSD关闭该功能
+innodb_write_io_threads=48 #设置写线程数G
+innodb_read_io_threads=48 #设置读线程数
+innodb_purge_threads=32 #设置回收已经使用并分配的undo页线程数
+innodb_adaptive_hash_index=0
+
+sql_mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION,NO_AUTO_VALUE_ON_ZERO,STRICT_ALL_TABLES
+
+innodb_flush_log_at_trx_commit=0
+
+
+innodb_buffer_pool_dump_at_shutdown=OFF
+innodb_buffer_pool_load_now=OFF
+innodb_buffer_pool_dump_pct=100
+innodb_buffer_pool_load_at_startup=OFF
+innodb_adaptive_hash_index=0
